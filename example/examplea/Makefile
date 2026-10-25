@@ -47,7 +47,7 @@ docs:
 
 valid:
 	-terraform fmt -recursive
-	-holden scan .
+	-holden scan
 
 
 target:

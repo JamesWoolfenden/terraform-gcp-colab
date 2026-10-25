@@ -1,7 +1,9 @@
 resource "google_kms_crypto_key" "colab" {
-  name            = "colab-key"
-  key_ring        = google_kms_key_ring.colab.id
-  rotation_period = "2592000s"
+  name                       = "colab-key"
+  key_ring                   = google_kms_key_ring.colab.id
+  rotation_period            = "2592000s"
+  destroy_scheduled_duration = "2592000s"
+
 
   lifecycle {
     prevent_destroy = true
