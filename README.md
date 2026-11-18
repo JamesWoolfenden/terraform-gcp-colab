@@ -59,6 +59,7 @@ No modules.
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_description"></a> [description](#input\_description) | Description of the runtime template | `string` | `"Managed by Terraform"` | no |
 | <a name="input_disk_size_gb"></a> [disk\_size\_gb](#input\_disk\_size\_gb) | Size of the persistent data disk, in GB | `number` | `100` | no |
+| <a name="input_disk_type"></a> [disk\_type](#input\_disk\_type) | Persistent disk type for the runtime data disk | `string` | `"pd-standard"` | no |
 | <a name="input_display_name"></a> [display\_name](#input\_display\_name) | Display name of the runtime template | `string` | n/a | yes |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | How long a runtime may be idle before it is shut down, in seconds with an s suffix | `string` | `"3600s"` | no |
 | <a name="input_kms_key_name"></a> [kms\_key\_name](#input\_kms\_key\_name) | Resource name of the Cloud KMS key used to encrypt runtime disks (CMEK) | `string` | n/a | yes |
@@ -66,8 +67,9 @@ No modules.
 | <a name="input_location"></a> [location](#input\_location) | Region of the runtime template | `string` | `"europe-west2"` | no |
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | Machine type of the runtime | `string` | `"e2-standard-4"` | no |
 | <a name="input_name"></a> [name](#input\_name) | Resource ID of the Colab Enterprise runtime template | `string` | n/a | yes |
-| <a name="input_network"></a> [network](#input\_network) | Self-link of the VPC network the runtime attaches to | `string` | n/a | yes |
-| <a name="input_subnetwork"></a> [subnetwork](#input\_subnetwork) | Self-link of the subnetwork the runtime attaches to | `string` | n/a | yes |
+| <a name="input_network"></a> [network](#input\_network) | Resource ID of the VPC network the runtime attaches to, e.g. google\_compute\_network.x.id | `string` | n/a | yes |
+| <a name="input_network_tags"></a> [network\_tags](#input\_network\_tags) | Network tags applied to the runtime, for targeting firewall rules | `list(string)` | `[]` | no |
+| <a name="input_subnetwork"></a> [subnetwork](#input\_subnetwork) | Resource ID of the subnetwork the runtime attaches to, e.g. google\_compute\_subnetwork.x.id | `string` | n/a | yes |
 
 ## Outputs
 
