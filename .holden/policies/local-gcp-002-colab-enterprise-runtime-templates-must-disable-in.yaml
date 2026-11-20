@@ -1,0 +1,20 @@
+id: LOCAL_GCP_002
+name: Colab Enterprise runtime templates must disable internet access
+principle: network-security
+severity: MEDIUM
+rationale: |
+  network_spec.enable_internet_access = true gives every notebook runtime a direct public internet path, an exfiltration and download channel for arbitrary code. HLD_GCP_235 enforces the equivalent on Vertex AI Notebooks runtimes but nothing covers google_colab_runtime_template.
+message: |
+  google_colab_runtime_template does not set network_spec.enable_internet_access = false.
+remediation: |
+  ```hcl
+  resource "google_colab_runtime_template" "main" {
+    network_spec {
+      enable_internet_access = false
+    }
+  }
+  ```
+resources:
+  google_colab_runtime_template:
+    path: network_spec.enable_internet_access
+    equals: false

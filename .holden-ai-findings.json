@@ -1,0 +1,90 @@
+{
+  "category": "all",
+  "findings": [
+    {
+      "confidence": "high",
+      "explanation": "The template sets no shielded_vm_config block, so enable_secure_boot defaults to false and every runtime created from it boots without verified-boot protection against bootkits/rootkits. The module otherwise hardens the runtime (CMEK, no internet, idle shutdown), so this is the outlier. No deterministic holden policy covers shielded_vm_config on google_colab_runtime_template (HLD_GCP_244/245 cover google_notebooks_instance only).",
+      "file": "google_colab_runtime_template.main.tf",
+      "first_seen": "2026-11-20",
+      "fix": "shielded_vm_config {\n  enable_secure_boot = var.enable_secure_boot\n}",
+      "fixable": true,
+      "id": "HOLDEN_AI_001",
+      "last_seen": "2026-11-20",
+      "line": 1,
+      "principle": "supply-chain",
+      "related_resources": [],
+      "remediation": "Add a shielded_vm_config block with enable_secure_boot driven by a new enable_secure_boot variable defaulting to true.",
+      "resolution": "Fixed: added shielded_vm_config { enable_secure_boot = var.enable_secure_boot } with new variable enable_secure_boot (bool, default true).",
+      "resource": "google_colab_runtime_template.main",
+      "severity": "MEDIUM",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Colab runtime template does not enable Shielded VM secure boot",
+      "unresolved_since": null
+    },
+    {
+      "confidence": "medium",
+      "explanation": "Vertex AI requires the CMEK key to live in the same region as the resource. var.kms_key_name accepts any non-empty string, so a key ring in another location (or a key name instead of a full resource ID) passes plan and only fails when the API rejects the create. Principle is a best fit: this is apply-time correctness rather than a security gap, since CMEK is already mandatory.",
+      "file": "variables.tf",
+      "first_seen": "2026-11-20",
+      "fixable": false,
+      "id": "HOLDEN_AI_002",
+      "last_seen": "2026-11-20",
+      "line": 52,
+      "principle": "reliability",
+      "related_resources": [
+        "google_colab_runtime_template.main"
+      ],
+      "remediation": "Validate the full projects/*/locations/*/keyRings/*/cryptoKeys/* format in variables.tf and add a precondition on the runtime template that the key's location matches var.location.",
+      "resolution": "Fixed: var.kms_key_name now validated against the full projects/*/locations/*/keyRings/*/cryptoKeys/* format, and a lifecycle precondition on the runtime template requires the key's location to equal var.location.",
+      "resource": "variable.kms_key_name",
+      "severity": "LOW",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "kms_key_name is only checked for non-empty; a malformed key or a key in another region fails late at apply",
+      "unresolved_since": null
+    },
+    {
+      "confidence": "high",
+      "explanation": "The route is named restricted_apis / colab-restricted-googleapis and its comment says it routes the restricted VIP range, but 199.36.153.8/30 is private.googleapis.com (restricted.googleapis.com is 199.36.153.4/30), and the DNS records resolve to private.googleapis.com. A reader copying this example would believe they had the VPC-SC-only restricted VIP when they have the general private VIP. The config is internally consistent; the naming and comment are wrong.",
+      "file": "example/examplea/google_compute_route.private_apis.tf",
+      "first_seen": "2026-11-20",
+      "fixable": false,
+      "id": "HOLDEN_AI_003",
+      "last_seen": "2026-11-20",
+      "line": 7,
+      "principle": "maintainability",
+      "related_resources": [
+        "google_dns_record_set.private_googleapis",
+        "google_dns_record_set.googleapis_wildcard"
+      ],
+      "remediation": "Rename the route to private_apis / colab-private-googleapis and correct the comments to describe the private VIP (or switch both route and DNS to the restricted VIP if VPC-SC is intended).",
+      "resolution": "Fixed: route renamed to google_compute_route.private_apis (colab-private-googleapis), comments corrected to the private.googleapis.com VIP with a note on switching to restricted.googleapis.com under VPC-SC.",
+      "resource": "google_compute_route.private_apis",
+      "severity": "LOW",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Example route and comments say 'restricted' VIP but configure the private.googleapis.com VIP",
+      "unresolved_since": null
+    }
+  ],
+  "scan_date": "2026-11-20T00:00:00Z",
+  "scan_path": ".",
+  "suggested_policies": [
+    {
+      "first_seen": "2026-11-20",
+      "last_seen": "2026-11-20",
+      "rationale": "Secure boot is off by default on google_colab_runtime_template, so runtimes boot without verified-boot protection. HLD_GCP_244/245 enforce Shielded VM on Vertex AI Notebooks but nothing covers Colab Enterprise templates.",
+      "status": "installed",
+      "yaml": "id: LOCAL_GCP_001\nname: Colab Enterprise runtime templates must enable Shielded VM secure boot\nprinciple: supply-chain\nseverity: MEDIUM\nrationale: |\n  Secure boot is off by default on google_colab_runtime_template, so runtimes boot without verified-boot protection. HLD_GCP_244/245 enforce Shielded VM on Vertex AI Notebooks but nothing covers Colab Enterprise templates.\nmessage: |\n  google_colab_runtime_template does not set shielded_vm_config.enable_secure_boot = true.\nremediation: |\n  ```hcl\n  resource \"google_colab_runtime_template\" \"main\" {\n    shielded_vm_config {\n      enable_secure_boot = true\n    }\n  }\n  ```\nresources:\n  google_colab_runtime_template:\n    path: shielded_vm_config.enable_secure_boot\n    equals: true\n"
+    },
+    {
+      "first_seen": "2026-11-20",
+      "last_seen": "2026-11-20",
+      "rationale": "network_spec.enable_internet_access = true gives every notebook runtime a direct public internet path, an exfiltration and download channel for arbitrary code. HLD_GCP_235 enforces the equivalent on Vertex AI Notebooks runtimes but nothing covers google_colab_runtime_template.",
+      "status": "installed",
+      "yaml": "id: LOCAL_GCP_002\nname: Colab Enterprise runtime templates must disable internet access\nprinciple: network-security\nseverity: MEDIUM\nrationale: |\n  network_spec.enable_internet_access = true gives every notebook runtime a direct public internet path, an exfiltration and download channel for arbitrary code. HLD_GCP_235 enforces the equivalent on Vertex AI Notebooks runtimes but nothing covers google_colab_runtime_template.\nmessage: |\n  google_colab_runtime_template does not set network_spec.enable_internet_access = false.\nremediation: |\n  ```hcl\n  resource \"google_colab_runtime_template\" \"main\" {\n    network_spec {\n      enable_internet_access = false\n    }\n  }\n  ```\nresources:\n  google_colab_runtime_template:\n    path: network_spec.enable_internet_access\n    equals: false\n"
+    }
+  ],
+  "suggested_suppressions": []
+}

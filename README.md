@@ -7,8 +7,8 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 Terraform module for a Colab Enterprise runtime template with CMEK-encrypted
-disks, no internet access and an idle shutdown timer. Exercises holden's
-`google_colab_runtime_template` policies.
+disks, no internet access, Shielded VM secure boot and an idle shutdown timer.
+Exercises holden's `google_colab_runtime_template` policies.
 
 ## Usage
 
@@ -61,6 +61,7 @@ No modules.
 | <a name="input_disk_size_gb"></a> [disk\_size\_gb](#input\_disk\_size\_gb) | Size of the persistent data disk, in GB | `number` | `100` | no |
 | <a name="input_disk_type"></a> [disk\_type](#input\_disk\_type) | Persistent disk type for the runtime data disk | `string` | `"pd-standard"` | no |
 | <a name="input_display_name"></a> [display\_name](#input\_display\_name) | Display name of the runtime template | `string` | n/a | yes |
+| <a name="input_enable_secure_boot"></a> [enable\_secure\_boot](#input\_enable\_secure\_boot) | Enable Shielded VM secure boot on runtimes created from the template | `bool` | `true` | no |
 | <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | How long a runtime may be idle before it is shut down, in seconds with an s suffix | `string` | `"3600s"` | no |
 | <a name="input_kms_key_name"></a> [kms\_key\_name](#input\_kms\_key\_name) | Resource name of the Cloud KMS key used to encrypt runtime disks (CMEK) | `string` | n/a | yes |
 | <a name="input_labels"></a> [labels](#input\_labels) | Labels applied to the runtime template | `map(string)` | `{}` | no |

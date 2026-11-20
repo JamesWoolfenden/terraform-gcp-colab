@@ -54,8 +54,8 @@ variable "kms_key_name" {
   description = "Resource name of the Cloud KMS key used to encrypt runtime disks (CMEK)"
 
   validation {
-    condition     = length(trimspace(var.kms_key_name)) > 0
-    error_message = "var.kms_key_name must be a non-empty string"
+    condition     = can(regex("^projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+$", var.kms_key_name))
+    error_message = "var.kms_key_name must be a full key resource ID: projects/<project>/locations/<location>/keyRings/<ring>/cryptoKeys/<key>"
   }
 }
 
@@ -134,4 +134,10 @@ variable "network_tags" {
     condition     = alltrue([for t in var.network_tags : can(regex("^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$", t))])
     error_message = "var.network_tags entries must be lowercase, start with a letter, and be at most 63 characters"
   }
+}
+
+variable "enable_secure_boot" {
+  type        = bool
+  description = "Enable Shielded VM secure boot on runtimes created from the template"
+  default     = true
 }

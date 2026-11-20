@@ -1,0 +1,20 @@
+id: LOCAL_GCP_001
+name: Colab Enterprise runtime templates must enable Shielded VM secure boot
+principle: supply-chain
+severity: MEDIUM
+rationale: |
+  Secure boot is off by default on google_colab_runtime_template, so runtimes boot without verified-boot protection. HLD_GCP_244/245 enforce Shielded VM on Vertex AI Notebooks but nothing covers Colab Enterprise templates.
+message: |
+  google_colab_runtime_template does not set shielded_vm_config.enable_secure_boot = true.
+remediation: |
+  ```hcl
+  resource "google_colab_runtime_template" "main" {
+    shielded_vm_config {
+      enable_secure_boot = true
+    }
+  }
+  ```
+resources:
+  google_colab_runtime_template:
+    path: shielded_vm_config.enable_secure_boot
+    equals: true

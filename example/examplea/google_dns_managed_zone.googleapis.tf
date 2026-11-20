@@ -1,5 +1,5 @@
 # Private zone so *.googleapis.com resolves to the private VIP range that
-# google_compute_route.restricted_apis routes, rather than to public API
+# google_compute_route.private_apis routes, rather than to public API
 # addresses this network has no route to.
 resource "google_dns_managed_zone" "googleapis" {
   name        = "colab-googleapis"

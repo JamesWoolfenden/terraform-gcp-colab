@@ -28,5 +28,16 @@ resource "google_colab_runtime_template" "main" {
     idle_timeout = var.idle_timeout
   }
 
+  shielded_vm_config {
+    enable_secure_boot = var.enable_secure_boot
+  }
+
   labels = var.labels
+
+  lifecycle {
+    precondition {
+      condition     = element(split("/", var.kms_key_name), 3) == var.location
+      error_message = "var.kms_key_name must be a key in the same location as var.location; Vertex AI rejects a CMEK key from another region"
+    }
+  }
 }
